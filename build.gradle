@@ -13,7 +13,7 @@ apply plugin: 'idea'
 apply plugin: 'spring-boot'
 
 jar {
-    baseName = 'gs-spring-boot'
+    baseName = 'spring-boot-test'
     version =  '0.1.0'
 }
 
@@ -23,12 +23,9 @@ repositories {
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
-    // tag::actuator[]
     compile("org.springframework.boot:spring-boot-starter-actuator")
-    // end::actuator[]
-    // tag::tests[]
+    compile("com.google.guava:guava:11.0.2")
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    // end::tests[]
 }
 
 task wrapper(type: Wrapper) {
