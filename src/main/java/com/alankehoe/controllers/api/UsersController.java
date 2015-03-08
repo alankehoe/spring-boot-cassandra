@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 public class UsersController extends BaseController {
 
-    @ResponseBody
     @RequestMapping(value = "/users", method = RequestMethod.GET, headers = "Accept=application/json")
     public List<User> index() {
         return userService.listUsers();
