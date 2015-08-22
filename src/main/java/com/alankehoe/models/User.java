@@ -4,17 +4,18 @@ import java.util.UUID;
 
 public class User {
 
-    private UUID id;
+    private UUID ref;
     private String firstName;
     private String lastName;
     private int age;
+    private String email;
 
-    public UUID getId() {
-        return id;
+    public UUID getRef() {
+        return ref;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setRef(UUID ref) {
+        this.ref = ref;
     }
 
     public String getFirstName() {
@@ -41,6 +42,14 @@ public class User {
         this.age = age;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -54,7 +63,7 @@ public class User {
             return false;
         if (firstName != null ? !firstName.equals(user.firstName) : user.firstName != null)
             return false;
-        if (id != null ? !id.equals(user.id) : user.id != null)
+        if (ref != null ? !ref.equals(user.ref) : user.ref != null)
             return false;
         if (lastName != null ? !lastName.equals(user.lastName) : user.lastName != null)
             return false;
@@ -64,7 +73,7 @@ public class User {
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
+        int result = ref != null ? ref.hashCode() : 0;
         result = 31 * result + (firstName != null ? firstName.hashCode() : 0);
         result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
         result = 31 * result + age;

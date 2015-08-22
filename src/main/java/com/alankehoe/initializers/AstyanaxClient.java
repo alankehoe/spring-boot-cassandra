@@ -20,9 +20,11 @@ public class AstyanaxClient {
     public void setupContext() {
         context = new AstyanaxContext.Builder()
                 .forCluster("Test Cluster")
-                .forKeyspace("spring_boot_cassandra")
+                .forKeyspace("application")
                 .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
                                 .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
+                                .setTargetCassandraVersion("1.2")
+                                .setCqlVersion("3.0.0")
                 )
                 .withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl("MyConnectionPool")
                                 .setPort(9160)
