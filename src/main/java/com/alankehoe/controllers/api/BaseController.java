@@ -14,7 +14,7 @@ public class BaseController extends ApplicationController {
     @Autowired
     protected AstyanaxClient astyanaxClient;
 
-    protected UserService getUserService() {
-        return new UserService(astyanaxClient.getCluster());
+    protected UserService getUserService(String keyspaceName) {
+        return new UserService(astyanaxClient.getCluster(), keyspaceName);
     }
 }

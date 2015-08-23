@@ -25,8 +25,8 @@ public class UserService extends BaseService<User> {
     private static ColumnFamily<UUID, String> CF_USERS = ColumnFamily
             .newColumnFamily("users", UUIDSerializer.get(), StringSerializer.get());
 
-    public UserService(Cluster cluster) {
-        super(cluster);
+    public UserService(Cluster cluster, String keyspaceName) {
+        super(cluster, keyspaceName);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class UserService extends BaseService<User> {
         stampAuditDetailsForCreate(user);
 
         try {
-            Keyspace keyspace = cluster.getKeyspace("application");
+            Keyspace keyspace = cluster.getKeyspace(keyspaceName);
 
             MutationBatch mutationBatch = keyspace.prepareMutationBatch();
 

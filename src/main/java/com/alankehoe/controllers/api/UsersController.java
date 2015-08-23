@@ -18,13 +18,13 @@ public class UsersController extends BaseController {
 
     @RequestMapping(value = "/users", method = RequestMethod.GET, headers = "Accept=application/json")
     public List<User> index() {
-        return getUserService().list();
+        return getUserService("application").list();
     }
 
     @RequestMapping(value = "/users/new", method = RequestMethod.GET, headers = "Accept=application/json")
     public User show() {
         try {
-            return getUserService().create(mockUser());
+            return getUserService("application").create(mockUser());
         } catch (ConnectionException e) {
             return null;
         }
