@@ -2,16 +2,11 @@ package com.alankehoe.controllers.api;
 
 import com.alankehoe.persistence.models.User;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import org.joda.time.DateTime;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 public class UsersController extends BaseController {
