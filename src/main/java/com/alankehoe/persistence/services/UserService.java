@@ -41,8 +41,6 @@ public class UserService extends BaseService<User> {
         stampAuditDetailsForCreate(user);
 
         try {
-            Keyspace keyspace = cluster.getKeyspace(keyspaceName);
-
             MutationBatch mutationBatch = keyspace.prepareMutationBatch();
 
             ColumnListMutation<String> userMutation = mutationBatch.withRow(CF_USERS, user.getRef());
