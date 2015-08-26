@@ -25,27 +25,22 @@ import java.util.UUID;
 public abstract class BaseService<T extends Entity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseService.class);
-
-    private Class<T> genericSuperClass = null;
     
     protected Cluster cluster = null;
     protected Keyspace keyspace = null;
     protected ColumnMapper<T> columnMapper = null;
 
-    protected BaseService(Cluster cluster, String keyspaceName, Class<T> genericSuperClass) {
+    protected BaseService(Cluster cluster, String keyspaceName) {
         this.cluster = cluster;
-        this.genericSuperClass = genericSuperClass;
         
         try {
             this.keyspace = cluster.getKeyspace(keyspaceName);
         } catch (ConnectionException e) {
-            LOGGER.error("Failed to connect to cassandra for keyspace {}", keyspaceName);
+            LOGGER.error("Failed to connect to keyspace {}", keyspaceName);
         }
     }
     
     public List<T> findAll(ColumnFamily<UUID, String> columnFamily) throws ConnectionException {
-        List<T> entities = Lists.newArrayList();
-        
         Rows<UUID, String> rows;
         try {
             rows = keyspace.prepareQuery(columnFamily)
@@ -53,26 +48,21 @@ public abstract class BaseService<T extends Entity> {
                     .execute()
                     .getResult();
         } catch (ConnectionException e) {
-            LOGGER.error("failed to find all {}'s", genericSuperClass.getSimpleName());
+            LOGGER.error("failed to find all entities");
             throw e;
         }
-        
-        for (Row<UUID, String> row : rows) {
-            T entity = columnMapper.convert(row.getColumns(), getEmptyEntity());
-            entities.add(entity);
-        }
-        
-        return entities;
+
+        return convertAllRows(rows);
     }
-    
+
     public T findByRef(UUID ref, ColumnFamily<UUID, String> columnFamily) throws ConnectionException {
         try {
             ColumnFamilyQuery<UUID, String> usersColumnFamily = keyspace.prepareQuery(columnFamily);
             RowQuery<UUID, String> rowQuery = usersColumnFamily.getKey(ref);
             OperationResult<ColumnList<String>> operationResult = rowQuery.execute();
-            return columnMapper.convert(operationResult.getResult(), getEmptyEntity());
+            return columnMapper.convert(operationResult.getResult());
         } catch (ConnectionException e) {
-            LOGGER.error("failed to find {} with ref {}", genericSuperClass.getSimpleName(), ref);
+            LOGGER.error("failed to find entity with ref {}", ref);
             throw e;
         }
     }
@@ -90,16 +80,19 @@ public abstract class BaseService<T extends Entity> {
 
             return entity;
         } catch (ConnectionException e) {
-            LOGGER.error("failed to persist {} with ref {}", genericSuperClass.getSimpleName(), entity.getRef());
+            LOGGER.error("failed to persist entity with ref {}", entity.getRef());
             throw e;
         }
     }
 
-    private T getEmptyEntity() {
-        try {
-            return genericSuperClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            return null;
+    private List<T> convertAllRows(Rows<UUID, String> rows) {
+        List<T> entities = Lists.newArrayList();
+
+        for (Row<UUID, String> row : rows) {
+            T entity = columnMapper.convert(row.getColumns());
+            entities.add(entity);
         }
+
+        return entities;
     }
 }

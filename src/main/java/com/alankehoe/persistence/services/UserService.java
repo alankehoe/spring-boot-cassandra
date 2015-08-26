@@ -17,7 +17,7 @@ public class UserService extends BaseService<User> implements GenericService<Use
             .newColumnFamily("users", UUIDSerializer.get(), StringSerializer.get());
     
     public UserService(Cluster cluster, String keyspaceName) {
-        super(cluster, keyspaceName, User.class);
+        super(cluster, keyspaceName);
         
         columnMapper = new UserColumnMapper();
     }

@@ -5,7 +5,11 @@ import com.netflix.astyanax.ColumnListMutation;
 import com.netflix.astyanax.model.ColumnList;
 
 public class UserColumnMapper extends ColumnMapper<User> {
-
+    
+    public UserColumnMapper() {
+        super(User.class);
+    }
+    
     @Override
     protected void insertColumns(ColumnListMutation<String> column, User entity) {
         column.putColumn("name", entity.getName());
