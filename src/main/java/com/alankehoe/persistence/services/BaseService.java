@@ -1,8 +1,8 @@
 package com.alankehoe.persistence.services;
 
-import com.alankehoe.persistence.utils.AuditUtils;
 import com.alankehoe.persistence.mappers.ColumnMapper;
 import com.alankehoe.persistence.models.Entity;
+import com.alankehoe.persistence.utils.AuditUtils;
 import com.google.common.collect.Lists;
 import com.netflix.astyanax.Cluster;
 import com.netflix.astyanax.ColumnListMutation;
