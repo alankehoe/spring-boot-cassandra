@@ -30,8 +30,10 @@ import java.util.concurrent.Executors;
 public abstract class BaseService<T extends Entity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseService.class);
+    private static final int THREAD_POOL_SIZE = 10;
 
-    protected final ListeningExecutorService listeningExecutorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10));
+    protected final ListeningExecutorService listeningExecutorService = MoreExecutors
+            .listeningDecorator(Executors.newFixedThreadPool(THREAD_POOL_SIZE));
 
     protected Cluster cluster = null;
     protected Keyspace keyspace = null;
@@ -39,14 +41,14 @@ public abstract class BaseService<T extends Entity> {
 
     protected BaseService(Cluster cluster, String keyspaceName) {
         this.cluster = cluster;
-        
+
         try {
             this.keyspace = cluster.getKeyspace(keyspaceName);
         } catch (ConnectionException e) {
             LOGGER.error("Failed to connect to keyspace {}", keyspaceName);
         }
     }
-    
+
     public List<T> findAll(ColumnFamily<UUID, String> columnFamily) throws ConnectionException {
         Rows<UUID, String> rows;
         try {
