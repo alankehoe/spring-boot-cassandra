@@ -1,5 +1,6 @@
 package com.alankehoe.persistence.services;
 
+import com.alankehoe.persistence.client.AstyanaxClient;
 import com.alankehoe.persistence.mappers.ColumnMapper;
 import com.alankehoe.persistence.models.Entity;
 import com.alankehoe.persistence.utils.AuditUtils;
@@ -32,24 +33,26 @@ public abstract class BaseService<T extends Entity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseService.class);
     private static final int THREAD_POOL_SIZE = 10;
 
-    protected final ListeningExecutorService listeningExecutorService = MoreExecutors
+    private final ListeningExecutorService executorService = MoreExecutors
             .listeningDecorator(Executors.newFixedThreadPool(THREAD_POOL_SIZE));
 
-    protected Cluster cluster = null;
-    protected Keyspace keyspace = null;
-    protected ColumnMapper<T> columnMapper = null;
+    private Keyspace keyspace;
+    private ColumnMapper<T> columnMapper;
+    private ColumnFamily<UUID, String> columnFamily;
 
-    protected BaseService(Cluster cluster, String keyspaceName) {
-        this.cluster = cluster;
+    protected BaseService(String keyspaceName, ColumnFamily<UUID, String> columnFamily, ColumnMapper<T> columnMapper) {
+        Cluster cluster = AstyanaxClient.getCluster();
 
         try {
             this.keyspace = cluster.getKeyspace(keyspaceName);
+            this.columnFamily = columnFamily;
+            this.columnMapper = columnMapper;
         } catch (ConnectionException e) {
             LOGGER.error("Failed to connect to keyspace {}", keyspaceName);
         }
     }
 
-    public List<T> findAll(ColumnFamily<UUID, String> columnFamily) throws ConnectionException {
+    public List<T> findAll() throws ConnectionException {
         Rows<UUID, String> rows;
         try {
             rows = keyspace.prepareQuery(columnFamily)
@@ -64,13 +67,13 @@ public abstract class BaseService<T extends Entity> {
         return convertAllRows(rows);
     }
 
-    public ListenableFuture<List<T>> findAllAsync(final ColumnFamily<UUID, String> columnFamily) {
-        Callable<List<T>> asyncTask = () -> findAll(columnFamily);
+    public ListenableFuture<List<T>> findAllAsync() {
+        Callable<List<T>> asyncTask = this::findAll;
 
-        return listeningExecutorService.submit(asyncTask);
+        return executorService.submit(asyncTask);
     }
 
-    public T findByRef(UUID ref, ColumnFamily<UUID, String> columnFamily) throws ConnectionException {
+    public T findByRef(UUID ref) throws ConnectionException {
         try {
             ColumnFamilyQuery<UUID, String> usersColumnFamily = keyspace.prepareQuery(columnFamily);
             RowQuery<UUID, String> rowQuery = usersColumnFamily.getKey(ref);
@@ -82,13 +85,13 @@ public abstract class BaseService<T extends Entity> {
         }
     }
 
-    public ListenableFuture<T> findByRefAsync(final UUID ref, final ColumnFamily<UUID, String> columnFamily) {
-        Callable<T> asyncTask = () -> findByRef(ref, columnFamily);
+    public ListenableFuture<T> findByRefAsync(UUID ref) {
+        Callable<T> asyncTask = () -> findByRef(ref);
 
-        return listeningExecutorService.submit(asyncTask);
+        return executorService.submit(asyncTask);
     }
 
-    public T create(T entity, ColumnFamily<UUID, String> columnFamily) throws ConnectionException {
+    public T create(T entity) throws ConnectionException {
         AuditUtils.stampAuditDetailsForCreate(entity);
 
         try {

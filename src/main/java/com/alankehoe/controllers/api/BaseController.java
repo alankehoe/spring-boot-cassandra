@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class BaseController extends ApplicationController {
 
     protected EventService getEventService(String keyspaceName) {
-        return new EventService(AstyanaxClient.getCluster(), keyspaceName);
+        return new EventService(keyspaceName);
     }
 }
