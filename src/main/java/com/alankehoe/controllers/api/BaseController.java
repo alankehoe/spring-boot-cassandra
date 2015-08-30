@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class BaseController extends ApplicationController {
 
+    public static final String REQUEST_HEADERS = "Accept=application/json";
+    
     protected EventService getEventService(String keyspaceName) {
         return new EventService(keyspaceName);
     }

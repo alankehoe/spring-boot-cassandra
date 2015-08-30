@@ -67,7 +67,7 @@ public abstract class BaseService<T extends Entity> {
         return convertAllRows(rows);
     }
 
-    public ListenableFuture<List<T>> findAllAsync() {
+    public ListenableFuture<List<T>> findAllAsync() throws ConnectionException {
         Callable<List<T>> asyncTask = this::findAll;
 
         return executorService.submit(asyncTask);
@@ -85,7 +85,7 @@ public abstract class BaseService<T extends Entity> {
         }
     }
 
-    public ListenableFuture<T> findByRefAsync(UUID ref) {
+    public ListenableFuture<T> findByRefAsync(UUID ref) throws ConnectionException {
         Callable<T> asyncTask = () -> findByRef(ref);
 
         return executorService.submit(asyncTask);
@@ -107,6 +107,12 @@ public abstract class BaseService<T extends Entity> {
             LOGGER.error("failed to persist entity with ref {}", entity.getRef());
             throw e;
         }
+    }
+
+    public ListenableFuture<T> createAsync(T entity) throws ConnectionException {
+        Callable<T> asyncTask = () -> create(entity);
+
+        return executorService.submit(asyncTask);
     }
 
     private List<T> convertAllRows(Rows<UUID, String> rows) {

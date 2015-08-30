@@ -2,7 +2,6 @@ package com.alankehoe.controllers.api;
 
 import com.alankehoe.events.EventManager;
 import com.alankehoe.persistence.models.Event;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,32 +12,34 @@ import java.util.UUID;
 
 @RestController
 public class EventsController extends BaseController {
-    
-    @RequestMapping(value = "/events", method = RequestMethod.GET, headers = "Accept=application/json")
+
+    public static final String EVENTS_RESOURCE = "/events";
+
+    @RequestMapping(value = EVENTS_RESOURCE, method = RequestMethod.GET, headers = REQUEST_HEADERS)
     public List<Event> index() {
         try {
-            return getEventService("application").findAll();
-        } catch (ConnectionException e) {
+            return getEventService("application").findAllAsync().get();
+        } catch (Exception e) {
             return null;
         }
     }
 
-    @RequestMapping(value = "/events/{ref}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = EVENTS_RESOURCE + "/{ref}", method = RequestMethod.GET, headers = REQUEST_HEADERS)
     public Event show(@PathVariable("ref") String ref) {
         try {
-            return getEventService("application").findByRef(UUID.fromString(ref));
-        } catch (ConnectionException e) {
+            return getEventService("application").findByRefAsync(UUID.fromString(ref)).get();
+        } catch (Exception e) {
             return null;
         }
     }
 
-    @RequestMapping(value = "/events/create", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = EVENTS_RESOURCE + "/create", method = RequestMethod.GET, headers = REQUEST_HEADERS)
     public Event create() {
         try {
-            Event event = getEventService("application").create(mockEvent());
+            Event event = getEventService("application").createAsync(mockEvent()).get();
             EventManager.postAsync(event);
             return event;
-        } catch (ConnectionException e) {
+        } catch (Exception e) {
             return null;
         }
     }
