@@ -1,4 +1,4 @@
-package com.alankehoe.bus.subscribers;
+package com.alankehoe.events.subscribers;
 
 import com.alankehoe.persistence.models.Event;
 import com.google.common.eventbus.Subscribe;
@@ -10,7 +10,7 @@ public class EventSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSubscriber.class);
     
     @Subscribe
-    public void handleEvent(Event event){
-        LOGGER.info("Cool stuff {}", event.getPayload());
+    public void logEventPayload(Event event){
+        LOGGER.info("Logged event {} with payload {}", event.getRef(), event.getPayload());
     }
 }

@@ -1,4 +1,4 @@
-package com.alankehoe.initializers;
+package com.alankehoe.persistence.client;
 
 import com.netflix.astyanax.AstyanaxContext;
 import com.netflix.astyanax.Cluster;
@@ -12,14 +12,26 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-@Component
 public class AstyanaxClient {
 
-    private Cluster cluster;
+    private static Cluster cluster;
 
-    @PostConstruct
-    public void setupClusterContext() {
-        ConnectionPoolConfigurationImpl poolConfig = new ConnectionPoolConfigurationImpl("MyConnectionPool")
+    static {
+        ConnectionPoolConfigurationImpl poolConfig = getConnectionPoolConfiguration();
+        
+        AstyanaxContext<Cluster> clusterContext = getAstyanaxClusterContext(poolConfig);
+
+        clusterContext.start();
+
+        cluster = clusterContext.getClient();
+    }
+
+    public static Cluster getCluster() {
+        return cluster;
+    }
+
+    private static ConnectionPoolConfigurationImpl getConnectionPoolConfiguration() {
+        return new ConnectionPoolConfigurationImpl("MyConnectionPool")
                 .setPort(9160)
                 .setMaxConnsPerHost(1)
                 .setSeeds("127.0.0.1:9160")
@@ -27,9 +39,12 @@ public class AstyanaxClient {
                 .setLatencyAwareResetInterval(0)
                 .setLatencyAwareBadnessThreshold(2)
                 .setLatencyAwareWindowSize(100);
+    }
 
+    private static AstyanaxContext<Cluster> getAstyanaxClusterContext(ConnectionPoolConfigurationImpl poolConfig) {
         AstyanaxContext.Builder builder = new AstyanaxContext.Builder();
-        AstyanaxContext<Cluster> clusterContext = builder
+
+        return builder
                 .forCluster("Test Cluster")
                 .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
                                 .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
@@ -38,13 +53,5 @@ public class AstyanaxClient {
                 .withConnectionPoolConfiguration(poolConfig)
                 .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
                 .buildCluster(ThriftFamilyFactory.getInstance());
-
-        clusterContext.start();
-
-        cluster = clusterContext.getClient();
-    }
-
-    public Cluster getCluster() {
-        return cluster;
     }
 }

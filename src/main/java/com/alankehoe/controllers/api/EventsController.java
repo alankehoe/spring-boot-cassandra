@@ -1,5 +1,6 @@
 package com.alankehoe.controllers.api;
 
+import com.alankehoe.events.EventManager;
 import com.alankehoe.persistence.models.Event;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,10 +35,9 @@ public class EventsController extends BaseController {
     @RequestMapping(value = "/events/create", method = RequestMethod.GET, headers = "Accept=application/json")
     public Event create() {
         try {
-            Event event = mockEvent();
-            
-            bus.getEventBus().post(event);
-            return getEventService("application").create(event);
+            Event event = getEventService("application").create(mockEvent());
+            EventManager.postAsync(event);
+            return event;
         } catch (ConnectionException e) {
             return null;
         }
